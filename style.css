@@ -76,8 +76,8 @@ body:before {
     background-color:#faf1df;
     -webkit-transform:translate3d(-5%,0,0);
     transform:translate3d(-5%,0,0);
-    -webkit-animation:a 20s cubic-bezier(.455,.03,.515,.955) infinite alternate;
-    animation:a 20s cubic-bezier(.455,.03,.515,.955) infinite alternate
+    -webkit-animation:a 15s cubic-bezier(.455,.03,.515,.955) infinite alternate;
+    animation:a 15s cubic-bezier(.455,.03,.515,.955) infinite alternate
 }
 body:after {
     top:-18vh;
