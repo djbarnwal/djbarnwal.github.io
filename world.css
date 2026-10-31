@@ -1,0 +1,98 @@
+/* A room to inhabit: restrained chrome, optical texture, and breathing space. */
+body {
+  background: #4d463f;
+}
+#loading {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  letter-spacing: 0.5px;
+  color: #e3d4bd;
+}
+.focus-shade {
+  background: radial-gradient(ellipse at center, transparent 22%, #090d1c65 100%);
+}
+.focus-toolbar button {
+  border-color: #efe2ce29;
+  background: #151820c4;
+  backdrop-filter: blur(12px);
+  box-shadow: none;
+}
+#monitor-surface {
+  background: #122635;
+  animation: screen-wake 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes screen-wake {
+  0% {
+    opacity: 0.25;
+    clip-path: inset(48% 0 48% 0);
+  }
+  40% {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+}
+#monitor-surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(transparent 0px, transparent 3px, #13263609 4px);
+  opacity: 0.5;
+}
+.monitor-chrome {
+  height: 46px;
+  gap: 22px;
+  background: #20313f;
+  font-size: 14px;
+  position: relative;
+  z-index: 1;
+}
+.screen-tabs {
+  display: flex;
+  margin-left: auto;
+  gap: 5px;
+  align-items: center;
+}
+.screen-tabs button {
+  font:
+    14px Arial,
+    sans-serif;
+  background: transparent;
+  color: #a8b8b8;
+  padding: 7px 12px;
+  border-radius: 4px;
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+.screen-tabs button[aria-pressed='true'] {
+  color: #edd9af;
+  background: #fff3cd0a;
+}
+.screen-tabs button:hover {
+  color: #f1e5cb;
+  background: #fff3cd0e;
+}
+@media (max-width: 600px) {
+  .monitor-chrome {
+    height: 36px;
+    padding: 0 12px;
+    gap: 12px;
+  }
+  .monitor-chrome .window-dots {
+    display: none;
+  }
+  .screen-tabs button {
+    padding: 5px 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #monitor-surface {
+    animation: none;
+  }
+}

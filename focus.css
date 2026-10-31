@@ -1,0 +1,125 @@
+/* The reading surface is projected into the physical monitor, not a window over it. */
+#focus-view {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+.focus-shade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 34%, #100e0b30 100%);
+  pointer-events: none;
+}
+.focus-toolbar {
+  position: absolute;
+  left: max(20px, env(safe-area-inset-left));
+  right: max(20px, env(safe-area-inset-right));
+  top: max(20px, env(safe-area-inset-top));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  z-index: 3;
+}
+.focus-toolbar button {
+  pointer-events: auto;
+  background: #1e211eed;
+  border: 1px solid #eee3cc40;
+  border-radius: 25px;
+  color: #eee5d5;
+  padding: 12px 18px;
+  font-size: 14px;
+  line-height: 1.25;
+  box-shadow: 0 4px 20px #0002;
+  transition: background 0.2s;
+}
+.focus-toolbar button:hover {
+  background: #35372ff5;
+}
+.focus-toolbar button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+#monitor-surface {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #14283a;
+  color: #f1e9d4;
+  pointer-events: auto;
+  border-radius: 1px;
+  box-shadow: inset 0 0 28px #0b1a2920;
+  animation: screen-arrive 0.24s ease-out;
+}
+.monitor-chrome {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex: none;
+  height: 42px;
+  padding: 0 24px;
+  background: #203347;
+  color: #a6c1c2;
+  font: 14px monospace;
+  border-bottom: 1px solid #a6c1c214;
+}
+.monitor-chrome .window-dots i {
+  width: 8px;
+  height: 8px;
+}
+#monitor-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #738b91 #14283a;
+  touch-action: pan-y;
+  outline-offset: -3px;
+  scroll-padding: 20px;
+  container-type: size;
+}
+#monitor-content:focus-visible {
+  outline: 1px solid #e7bd7b88;
+}
+@keyframes screen-arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 600px) {
+  .focus-toolbar {
+    top: max(14px, env(safe-area-inset-top));
+    left: 14px;
+    right: 14px;
+  }
+  .focus-toolbar button {
+    padding: 11px 14px;
+  }
+  .monitor-chrome {
+    height: 32px;
+    padding: 0 15px;
+    gap: 18px;
+  }
+}
+@media (max-height: 500px) {
+  .focus-toolbar {
+    top: 10px;
+  }
+  .focus-toolbar button {
+    padding: 9px 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #monitor-surface {
+    animation: none;
+  }
+  .focus-toolbar button {
+    transition: none;
+  }
+}

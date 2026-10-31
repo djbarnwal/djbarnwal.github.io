@@ -1,55 +1,72 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#25212b" />
+    <title>Dhiraj’s desk — a place of small discoveries</title>
+    <meta
+      name="description"
+      content="Step inside Dhiraj’s interactive 3D workspace. A quiet room of ideas, memories, and little discoveries."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232b3538'/%3E%3Cpath d='M8 9h16v11H8zM16 20v4m-5 0h10' fill='none' stroke='%23efba78' stroke-width='2'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="world.css" />
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three.module.js" } }
+    </script>
+    <script type="module" src="app.js"></script>
+    <link rel="modulepreload" href="scene.js" />
+    <link rel="modulepreload" href="vendor/three.module.js" />
+    <link rel="modulepreload" href="vendor/three.core.min.js" />
+  </head>
+  <body>
+    <main id="world" aria-label="Interactive 3D recreation of Dhiraj’s workstation">
+      <canvas
+        id="desk-canvas"
+        aria-label="3D desk. Deliberately drag empty space to look around. Select a monitor, a framed print or the Polaroids to move closer, or a small desk object to discover what it does."
+      ></canvas>
+    </main>
+    <div id="loading" role="status"><span></span>Opening the desk…</div>
+    <div id="fallback" hidden>
+      <h2>This room needs 3D support.</h2>
+      <p>You can still read about me and see my photos.</p>
+      <p class="fallback-links">
+        <button data-open="about">About me</button> · <button data-open="photos">Photos</button>
+      </p>
+    </div>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dhiraj Barnwal</title>
-
-  <meta charset="utf-8">
-  <meta content="width=device-width,initial-scale=1,maximum-scale=1,initial-scale=1,shrink-to-fit=no" name="viewport">
-
-  <meta name="msapplication-TileColor" content="#FAFAFA">
-  <meta name="theme-color" content="#FAFAFA">
-  <meta name="format-detection" content="telephone=no">
-  <meta name="apple-mobile-web-app-status-bar-style" content="white-translucent" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-
-  <meta name="description" content="A application developer and HCI enthusiast">
-  <meta name="application-name" content="Dhiraj Barnwal">
-
-  <link rel="icon" type="image/png" href="favicon.png"/>
-  <link rel='stylesheet' href='./style.css'/>
-
-</head>
-
-<body>
-
-  <div class="content">
-    <h1 class="title">Dhiraj Barnwal</h1>
-    <p class="bio">Data Tools, HCI and Finance enthusiast</p>
-    <p class="small-bio">
-      I am currently working at Rill Data in the Applications Engineering team.
-      I am highly interested in the fields of Human-Computer Interaction, Application design & development and Finance. 
-      I like to club my interests together to create useful data tools. 
-      <!-- Have a look at my <a  target="_blank" href="resume.pdf">resume</a> to know more about me. -->
-    </p>
-    <ul class="links">
-      <li class="links__item">
-        <a href="#">dhirajbarnwal at outlook dot com</a>
-      </li>
-      <li class="links__item">
-        <a href="https://github.com/djbarnwal/" target="_blank" rel="noopener noreferrer">github</a>
-      </li>
-      <li class="links__item">
-        <a href="https://www.linkedin.com/in/dhiraj-barnwal-86b599a2/" target="_blank" rel="noopener noreferrer">linkedin</a>
-      </li>
-      <!-- <li class="links__item">
-        <a href="resume.pdf" target="_blank" rel="noopener noreferrer">resume</a>
-      </li> -->
-    </ul>
-  </div>
-
-</body>
-
+    <section id="focus-view" role="dialog" aria-modal="true" aria-labelledby="focus-title" hidden>
+      <div class="focus-shade" aria-hidden="true"></div>
+      <h2 id="focus-title" class="sr-only">A closer look</h2>
+      <div class="focus-toolbar">
+        <button id="back-to-desk">← Back to desk</button>
+      </div>
+      <section id="monitor-surface" aria-labelledby="screen-title" hidden>
+        <div class="monitor-chrome">
+          <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span
+          ><span id="monitor-path"></span>
+          <nav class="screen-tabs" aria-label="On this desk">
+            <button data-screen="about" aria-pressed="false">About</button
+            ><button data-screen="chess" aria-pressed="false">Chess</button>
+          </nav>
+        </div>
+        <div id="monitor-content" tabindex="0" role="region" aria-label="Screen content"></div>
+      </section>
+    </section>
+    <dialog id="window" aria-labelledby="window-title">
+      <div class="window-bar">
+        <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span
+        ><span id="window-path"></span
+        ><button id="close" class="close" aria-label="Close window">×</button>
+      </div>
+      <div id="window-body"></div>
+    </dialog>
+    <div class="sr-only" role="status" id="status"></div>
+    <noscript><div class="no-script">Please enable JavaScript to explore the desk.</div></noscript>
+  </body>
 </html>
