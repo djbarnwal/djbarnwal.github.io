@@ -14,6 +14,9 @@ export function addDeskFurniture({ THREE, scene, materials, mat, box, cylinder, 
   desk.name = 'long-wood-table';
   const desktop = box(6.5, 0.24, 2.18, 0, DESK_TOP - 0.12, 0.58, materials.wood, desk, 0.025);
   desktop.name = 'continuous-desktop';
+  // Zooming in far enough over the desk lands here (see desk-zoom.js). Not clickable.
+  desktop.userData.action = { type: 'desk' };
+  desktop.userData.caption = 'A closer look at the desktop';
   box(6.44, 0.1, 2.12, 0, DESK_TOP - 0.285, 0.58, materials.wood, desk, 0.015);
   for (const x of [-2.98, 2.98]) {
     for (const z of [-0.31, 1.46])

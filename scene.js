@@ -19,6 +19,7 @@ import { addDeskAstronauts } from './desk-astronauts.js';
 import { addDeskDust } from './desk-dust.js';
 import { createDeskFocus } from './desk-focus.js';
 import { createDeskPointer } from './desk-pointer.js';
+import { createDeskZoom } from './desk-zoom.js';
 
 // Cap each frame's time step so lights don't jump after a stalled frame.
 const MAX_FRAME_SECONDS = 0.05;
@@ -32,7 +33,7 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
   const canvas = document.querySelector('#desk-canvas');
   const renderer = createDeskRenderer(canvas);
   const scene = createDeskScene(renderer);
-  const { camera, controls, reset: resetCamera } = createDeskCamera(canvas);
+  const { camera, controls, reset: resetCamera, fit: fitCamera, home } = createDeskCamera(canvas);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const discoveries = createDeskDiscoveries();
   const kit = createSceneKit({ scene, renderer, discoveries });
@@ -66,7 +67,7 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
   });
 
   function playToy(key) {
-    if (focus.active) return false;
+    if (focus.active && !focus.browsing) return false;
     const now = performance.now();
     const cube = cubes[Number(key.split('-')[1])];
     let message;
@@ -84,11 +85,13 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
     return true;
   }
 
-  // A click on an object. Clicks are ignored while the camera is zoomed in on something.
+  // A click on an object, or the zoom falling into it. Clicks are ignored while the camera
+  // is zoomed in on something, except in the desk view, which is there to be played with.
   function select(object) {
-    if (focus.active) return;
+    if (focus.active && !focus.browsing) return;
     const action = object.userData.action;
-    if (action.type === 'pegboard') focus.openPegboard(object);
+    if (action.type === 'desk') focus.openDesk(object);
+    else if (action.type === 'pegboard') focus.openPegboard(object);
     else if (action.type === 'open') onOpen(action.key);
     else if (action.type === 'poster') {
       object.userData.loadDetail?.();
@@ -106,6 +109,26 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
     onSelect: select,
   });
 
+  const zoom = createDeskZoom({
+    canvas,
+    camera,
+    controls,
+    home,
+    focus,
+    // The monitors (not the laptop, which only opens one of them), the framed prints,
+    // the Polaroids and the desk itself.
+    sites: [
+      ...kit.pickables.filter(
+        ({ userData: { screenSurface, action } }) =>
+          screenSurface || action.type === 'poster' || action.type === 'pegboard',
+      ),
+      scene.getObjectByName('continuous-desktop'),
+    ],
+    reducedMotion,
+    onEnter: select,
+    onPinchStart: pointer.cancel,
+  });
+
   const { composer, setSize, setDepthOfField } = createDeskComposer(renderer, scene, camera);
 
   function resize() {
@@ -114,8 +137,13 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
     pointer.cancel();
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    if (focus.active) focus.resize();
-    else resetCamera();
+    focus.resize();
+    if (focus.active) {
+      // The saved view was fitted to the old window, so the way back must be fitted anew.
+      fitCamera();
+      focus.returnTo(home, controls.maxDistance);
+    } else resetCamera();
+    zoom.reset();
     camera.updateProjectionMatrix();
     setSize(width, height);
     dust.resize(camera, height * renderer.getPixelRatio());
@@ -163,6 +191,7 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
     const seconds = Math.min(MAX_FRAME_SECONDS, Math.max(0.001, (time - lastFrame) * 0.001));
     lastFrame = time;
     if (focus.active) focus.update(time);
+    zoom.update(seconds);
     lighting.update(seconds, reducedMotion.matches);
     dust.update(seconds, lighting.brightness, reducedMotion.matches);
     discoveries.update(time);

@@ -77,14 +77,15 @@ export function createDeskPointer({ canvas, camera, controls, pickables, focus, 
       return;
     }
     // Hovering only changes the cursor, so clickable objects stay a quiet discovery.
-    if (focus.active || event.pointerType === 'touch') return;
-    canvas.style.cursor = objectAt(event) ? 'pointer' : 'grab';
+    if ((focus.active && !focus.browsing) || event.pointerType === 'touch') return;
+    canvas.style.cursor = objectAt(event) ? 'pointer' : focus.active ? 'default' : 'grab';
   });
 
   // Rotate the camera around its target, relative to where the drag started.
   function orbit(event) {
     const radiansPerPixel = (2 * Math.PI * DRAG_TURN_PER_SCREEN) / window.innerHeight;
     const view = press.startView.clone();
+    view.radius = camera.position.distanceTo(controls.target);
     view.theta = THREE.MathUtils.clamp(
       view.theta - (event.clientX - press.dragX) * radiansPerPixel,
       controls.minAzimuthAngle,

@@ -155,12 +155,15 @@ function showFocus(state) {
   focusView.dataset.phase = state.phase;
   $('#focus-title').textContent =
     state.mode === 'monitor' ? MONITORS[state.key].title : state.caption;
+  // The desk view is already at the desk, so its way back leads to the whole room.
+  const overview = state.mode === 'desk' ? 'room' : 'desk';
+  backToDesk.textContent = '← Back to ' + overview;
   backToDesk.disabled = state.phase === 'returning';
   monitorSurface.hidden = state.mode !== 'monitor' || state.phase !== 'ready';
 
   if (state.mode === 'monitor') showMonitor(state, starting || changed);
   else if (state.phase === 'ready')
-    status.textContent = state.caption + '. Escape returns to the desk.';
+    status.textContent = `${state.caption}. Escape returns to the ${overview}.`;
 }
 
 // Open the overlay and make the rest of the page unreachable until it closes.

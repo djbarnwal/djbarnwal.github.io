@@ -11,6 +11,9 @@ const ORBIT_LIMITS = { minAzimuth: -0.42, maxAzimuth: 0.6, minPolar: 0.95, maxPo
 const MIN_VISIBLE_HEIGHT = 7.35;
 const MIN_VISIBLE_WIDTH = 11.5;
 
+// How far the camera may zoom in from the default view, which is the furthest out it goes.
+const MAX_ZOOM = 2.3;
+
 export function createDeskCamera(canvas) {
   const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 80);
 
@@ -29,20 +32,21 @@ export function createDeskCamera(canvas) {
 
   const viewDirection = HOME_POSITION.clone().sub(LOOK_TARGET).normalize();
 
-  // Back the camera away along the home direction until the desk fits the viewport.
-  function fitCamera() {
+  // The distance at which the desk fits the viewport: the default view, and the furthest
+  // out the camera may go.
+  function fit() {
     const span = Math.max(
       MIN_VISIBLE_HEIGHT,
       MIN_VISIBLE_WIDTH / (window.innerWidth / window.innerHeight),
     );
     const distance = span / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
-    camera.position.copy(LOOK_TARGET).addScaledVector(viewDirection, distance);
-    controls.minDistance = distance * 0.62;
-    controls.maxDistance = distance * 1.45;
+    controls.minDistance = distance / MAX_ZOOM;
+    controls.maxDistance = distance;
   }
 
   function reset() {
-    fitCamera();
+    fit();
+    camera.position.copy(LOOK_TARGET).addScaledVector(viewDirection, controls.maxDistance);
     controls.target.copy(LOOK_TARGET);
     camera.zoom = 1;
     camera.updateProjectionMatrix();
@@ -50,5 +54,5 @@ export function createDeskCamera(canvas) {
   }
 
   reset();
-  return { camera, controls, reset };
+  return { camera, controls, reset, fit, home: LOOK_TARGET };
 }

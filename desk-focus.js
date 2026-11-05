@@ -12,8 +12,15 @@ const WHOLE_PRINT_FILL = 0.8;
 // board around them in sight.
 const PEGBOARD_FILL = 0.72;
 
-// Camera journeys to the monitors, the poster and the pegboard share one reversible
-// state machine.
+// How much of the screen's width the desktop fills in the desk view, and the direction
+// the camera looks at it from: from above, where the chair would be.
+const DESK_FILL = 0.88;
+const DESK_VIEW_DIRECTION = new THREE.Vector3(0.1, 0.72, 0.69).normalize();
+// How far behind the desktop's centre to aim, to show less floor and more of the monitors.
+const DESK_VIEW_AIM_BACK = 0.4;
+
+// Camera journeys to the monitors, the poster, the pegboard and the desk share one
+// reversible state machine.
 export function createDeskFocus({
   scene,
   camera,
@@ -71,7 +78,13 @@ export function createDeskFocus({
     }
   }
   function begin(mode, key, object) {
-    if (state || !object) return false;
+    if (!object) return false;
+    // The desk view is a place to look around, so its objects can be opened from there.
+    if (state) {
+      if (!isBrowsing()) return false;
+      state = { mode, key, object, phase: 'entering' };
+      return true;
+    }
     onBeforeFocus();
     const damping = controls.enableDamping;
     controls.enableDamping = false;
@@ -174,7 +187,30 @@ export function createDeskFocus({
       quaternion: orientation,
     };
   }
-  const poses = { monitor: monitorPose, poster: posterPose, pegboard: pegboardPose };
+  // Look down at the desktop, wide enough to fit its whole length.
+  function deskPose() {
+    const v = viewport();
+    scene.updateMatrixWorld(true);
+    const bounds = new THREE.Box3().setFromObject(state.object),
+      center = bounds.getCenter(new THREE.Vector3()),
+      tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    center.z -= DESK_VIEW_AIM_BACK;
+    const d =
+      bounds.getSize(new THREE.Vector3()).x / (2 * tangent * (v.width / v.height) * DESK_FILL);
+    const position = center.clone().addScaledVector(DESK_VIEW_DIRECTION, d);
+    return {
+      position,
+      quaternion: new THREE.Quaternion().setFromRotationMatrix(
+        new THREE.Matrix4().lookAt(position, center, camera.up),
+      ),
+    };
+  }
+  const poses = {
+    monitor: monitorPose,
+    poster: posterPose,
+    pegboard: pegboardPose,
+    desk: deskPose,
+  };
   function travel(duration, to) {
     const from = camera.position.clone(),
       rotation = camera.quaternion.clone(),
@@ -219,6 +255,20 @@ export function createDeskFocus({
     notify();
     travel(1000, pegboardPose());
     return true;
+  }
+  function openDesk(object) {
+    if (!begin('desk', 'desk', object)) return false;
+    notify();
+    travel(1000, deskPose());
+    return true;
+  }
+  // Make `back` lead to this distance from `target`, from the same viewing angle.
+  function returnTo(target, distance) {
+    saved.position.sub(saved.target).setLength(distance).add(target);
+    saved.target.copy(target);
+  }
+  function isBrowsing() {
+    return state?.mode === 'desk' && state.phase === 'ready';
   }
   function finishReturn() {
     camera.position.copy(saved.position);
@@ -266,12 +316,17 @@ export function createDeskFocus({
     switchMonitor,
     openPoster,
     openPegboard,
+    openDesk,
+    returnTo,
     back,
     skip,
     resize,
     update: step,
     get active() {
       return !!state;
+    },
+    get browsing() {
+      return isBrowsing();
     },
     get mode() {
       return state?.mode;
