@@ -1,22 +1,23 @@
 import { DESK_TOP } from './desk-furniture.js';
 import { createDeskCube } from './desk-cube.js';
+import { DESKTOP, PEGBOARD_Z } from './desk-layout.js';
 
 // Small playable objects to the right of the monitors: a tissue box whose tissue
 // unfurls, and two Rubik's cubes. Returns the cubes, which animate every frame.
 export function addDeskToys(kit) {
   addTissueBox(kit);
   const cubes = [
-    createDeskCube({ ...kit, DESK_TOP, x: 2.76, z: 0.86, angle: 0.19 }),
-    createDeskCube({ ...kit, DESK_TOP, x: 3.29, z: 1.03, angle: -0.28, flipped: true }),
+    createDeskCube({ ...kit, DESK_TOP, x: 2.14, z: 0.86, angle: 0.19 }),
+    createDeskCube({ ...kit, DESK_TOP, x: 2.67, z: 1.03, angle: -0.28, flipped: true }),
   ];
   cubes.forEach((cube, i) => kit.interactive(cube, { type: 'toy', key: 'cube-' + i }));
   return cubes;
 }
 
 function addTissueBox({ THREE, mat, mesh, box, sphere, group, interactive, discoveries }) {
-  const tissueBox = group(3.4, DESK_TOP, 0.25);
+  const tissueBox = group(DESKTOP.right - 0.25, DESK_TOP, PEGBOARD_Z + 0.08);
   tissueBox.name = 'tissue-box';
-  tissueBox.rotation.y = -0.08;
+  tissueBox.rotation.y = -0.08 - Math.PI / 2;
   box(0.65, 0.29, 0.4, 0, 0.145, 0, mat('#b3a58f', { roughness: 0.92 }), tissueBox, 0.025);
   box(0.64, 0.045, 0.005, 0, 0.064, 0.2, mat('#91816a', { roughness: 0.94 }), tissueBox, 0.002);
   const opening = sphere(0.15, 0, 0.289, 0, mat('#413b33'), tissueBox);

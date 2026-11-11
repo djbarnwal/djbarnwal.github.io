@@ -3,7 +3,9 @@ import { createDeskRenderer, createDeskScene, createDeskComposer } from './desk-
 import { createDeskCamera } from './desk-camera.js';
 import { createSceneKit } from './scene-kit.js';
 import { createDeskDiscoveries } from './desk-discoveries.js';
+import { addDeskRoom } from './desk-room.js';
 import { addDeskFurniture } from './desk-furniture.js';
+import { addDeskChest } from './desk-chest.js';
 import { addDeskBooks } from './desk-books.js';
 import { addDeskPlants } from './desk-plants.js';
 import { addDeskWallFrames } from './desk-wall-frames.js';
@@ -33,15 +35,17 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
   const canvas = document.querySelector('#desk-canvas');
   const renderer = createDeskRenderer(canvas);
   const scene = createDeskScene(renderer);
-  const { camera, controls, reset: resetCamera, fit: fitCamera, home } = createDeskCamera(canvas);
+  const { camera, controls, reset: resetCamera, fit: fitCamera, fitOrbitTarget, home } =
+    createDeskCamera(canvas);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const discoveries = createDeskDiscoveries();
   const kit = createSceneKit({ scene, renderer, discoveries });
 
   // Build the room.
+  const updateCity = addDeskRoom(kit);
   addDeskFurniture(kit);
   addDeskBooks(kit);
-  addDeskPlants(kit);
+  const addPlant = addDeskPlants(kit);
   const { photoMaterial } = addDeskWallFrames(kit);
   addDeskMonitors(kit);
   addDeskLaptop(kit);
@@ -53,6 +57,7 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
   const lighting = addDeskLighting(kit);
   addDeskAstronauts(kit);
   const dust = addDeskDust(kit);
+  addDeskChest(kit, addPlant);
 
   const focus = createDeskFocus({
     scene,
@@ -114,6 +119,7 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
     camera,
     controls,
     home,
+    fitOrbitTarget,
     focus,
     // The monitors (not the laptop, which only opens one of them), the framed prints,
     // the Polaroids and the desk itself.
@@ -136,15 +142,15 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
     const height = window.innerHeight;
     pointer.cancel();
     camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    focus.resize();
+    if (focus.active) {
+      fitCamera();
+      focus.resize();
+    }
     if (focus.active) {
       // The saved view was fitted to the old window, so the way back must be fitted anew.
-      fitCamera();
       focus.returnTo(home, controls.maxDistance);
     } else resetCamera();
     zoom.reset();
-    camera.updateProjectionMatrix();
     setSize(width, height);
     dust.resize(camera, height * renderer.getPixelRatio());
   }
@@ -192,6 +198,7 @@ export function createDesk({ onOpen, onLight, onError, onFocus, onSurface, onObj
     lastFrame = time;
     if (focus.active) focus.update(time);
     zoom.update(seconds);
+    updateCity(seconds, reducedMotion.matches);
     lighting.update(seconds, reducedMotion.matches);
     dust.update(seconds, lighting.brightness, reducedMotion.matches);
     discoveries.update(time);

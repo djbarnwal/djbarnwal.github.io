@@ -108,14 +108,46 @@ export function surfaceMaterials(maxAnisotropy = 8) {
     false,
     [40, 30],
   );
-  const plaster = new THREE.MeshStandardMaterial({
-    color: '#c0b5a5',
-    roughness: 0.93,
-    bumpMap: micro,
-    bumpScale: 0.012,
+  const linen = map(
+    128,
+    128,
+    (x, y) => {
+      const warp = Math.sin((x * Math.PI) / 2) * 2.4;
+      const weft = Math.sin((y * Math.PI) / 2) * 1.5;
+      const fibers = (noise(x, Math.floor(y / 6)) - 0.5) * 5;
+      const tone = warp + weft + fibers;
+      return [235 + tone, 223 + tone, 206 + tone];
+    },
+    true,
+    [9, 5],
+  );
+  const wallpaper = new THREE.MeshStandardMaterial({
+    map: linen,
+    emissive: '#dfd0b8',
+    emissiveIntensity: 0.035,
+    roughness: 0.96,
+    bumpMap: linen,
+    bumpScale: 0.003,
   });
+  // Four courses of oak boards with staggered end joints.
+  const floorColor = map(
+    1024,
+    256,
+    (x, y) => {
+      const row = Math.floor(y / 64);
+      const across = y % 64;
+      const along = (x + row * 173) % 1024;
+      const board = row * 2 + Math.floor(along / 512);
+      const end = along % 512;
+      const variation = (noise(board, 0) - 0.5) * 15;
+      const seam = across === 0 || end < 2 ? -25 : 0;
+      const bevel = across === 1 || end === 2 ? 9 : 0;
+      const tone = grain(end, across + board * 29) * 0.35 + variation + seam + bevel;
+      return [161 + tone, 133 + tone, 105 + tone];
+    },
+  );
   const floor = new THREE.MeshStandardMaterial({
-    color: '#999487',
+    map: floorColor,
     roughness: 0.82,
     bumpMap: micro,
     bumpScale: 0.008,
@@ -164,5 +196,5 @@ export function surfaceMaterials(maxAnisotropy = 8) {
     roughness: 1,
     metalness: 0,
   });
-  return { wood, fabric, plaster, floor, metal, leafBump, rug };
+  return { wood, fabric, wallpaper, floor, metal, leafBump, rug };
 }

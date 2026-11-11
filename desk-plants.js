@@ -1,4 +1,5 @@
 import { DESK_TOP } from './desk-furniture.js';
+import { UPPER_SHELF_SHIFT } from './desk-layout.js';
 
 // Potted plants on the shelving, the wall shelves and the desk.
 // Leaf angles come from the kit's seeded random sequence, so the plants must
@@ -16,8 +17,8 @@ export function addDeskPlants({ THREE, materials, mat, mesh, cylinder, curve, gr
   }
 
   // A pot with seven leafy stems; trailing plants also get three vines hanging down.
-  function plant(x, y, z, size = 1, trailing = false, potMaterial = materials.terra) {
-    const pot = group(x, y, z);
+  function plant(x, y, z, size = 1, trailing = false, potMaterial = materials.terra, parent) {
+    const pot = group(x, y, z, parent);
     cylinder(0.21 * size, 0.16 * size, 0.34 * size, 0, 0.17 * size, 0, potMaterial, pot);
     cylinder(0.22 * size, 0.22 * size, 0.055 * size, 0, 0.33 * size, 0, potMaterial, pot);
     cylinder(0.185 * size, 0.185 * size, 0.012 * size, 0, 0.36 * size, 0, mat('#4a4432'), pot);
@@ -80,9 +81,10 @@ export function addDeskPlants({ THREE, materials, mat, mesh, cylinder, curve, gr
   // On the desk, beside the laptop.
   plant(-2.38, DESK_TOP, 0.01, 0.48, false, materials.terra);
   // On the two wall shelves.
-  plant(-0.98, 4.66, -1, 0.86, false, materials.terra);
-  plant(2.44, 4.66, -0.89, 0.9, true, materials.cream);
+  plant(-0.98 + UPPER_SHELF_SHIFT, 4.66, -1, 0.86, false, materials.terra);
+  plant(2.44 + UPPER_SHELF_SHIFT, 4.66, -0.89, 0.9, true, materials.cream);
   plant(-1.83, 3.6, -0.87, 0.57, true, materials.cream);
+  return plant;
 }
 
 // A thin, curved, pointed leaf with a visible central vein: a 14 × 8 grid of

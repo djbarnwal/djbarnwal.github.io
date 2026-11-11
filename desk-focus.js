@@ -15,7 +15,7 @@ const PEGBOARD_FILL = 0.72;
 // How much of the screen's width the desktop fills in the desk view, and the direction
 // the camera looks at it from: from above, where the chair would be.
 const DESK_FILL = 0.88;
-const DESK_VIEW_DIRECTION = new THREE.Vector3(0.1, 0.72, 0.69).normalize();
+const DESK_VIEW_DIRECTION = new THREE.Vector3(0.1, 0.57, 0.815).normalize();
 // How far behind the desktop's centre to aim, to show less floor and more of the monitors.
 const DESK_VIEW_AIM_BACK = 0.4;
 
@@ -174,7 +174,8 @@ export function createDeskFocus({
     const v = viewport();
     scene.updateMatrixWorld(true);
     const bounds = new THREE.Box3().setFromObject(state.object),
-      size = bounds.getSize(new THREE.Vector3()),
+      inverse = state.object.matrixWorld.clone().invert(),
+      size = bounds.clone().applyMatrix4(inverse).getSize(new THREE.Vector3()),
       orientation = state.object.getWorldQuaternion(new THREE.Quaternion()),
       tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const d =

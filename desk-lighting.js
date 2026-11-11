@@ -1,8 +1,11 @@
+import { UPPER_SHELF_SHIFT } from './desk-layout.js';
+
 // Room light levels with the desk lights on, and with every desk light off.
 const ROOM_LIGHT = {
   hemisphere: { on: 0.32, off: 0.12 },
   key: { on: 0.58, off: 0.1 },
   fill: { on: 0.18, off: 0.07 },
+  sideWall: { on: 0.13, off: 0.05 },
   environment: { on: 0.15, off: 0.06 },
 };
 
@@ -15,6 +18,7 @@ const FADE_SPEED = 6;
 export function addDeskLighting({
   THREE,
   scene,
+  materials,
   mat,
   mesh,
   box,
@@ -41,6 +45,8 @@ export function addDeskLighting({
   const fill = new THREE.DirectionalLight('#d9dffa', ROOM_LIGHT.fill.on);
   fill.position.set(7, 5, -1);
   scene.add(fill);
+  const { sideWall } = materials;
+  sideWall.emissiveIntensity = ROOM_LIGHT.sideWall.on;
 
   // Everything that belongs to each switchable group, with its full-brightness value.
   const channels = {
@@ -194,10 +200,10 @@ export function addDeskLighting({
       g,
     ).castShadow = false;
   }
-  for (const shelfY of [3.72, 4.8]) {
+  for (const [shelfY, shift] of [[3.72, 0], [4.8, UPPER_SHELF_SHIFT]]) {
     const points = [];
     for (let i = 0; i < 13; i++) {
-      const x = -1.8 + i * 0.355;
+      const x = -1.8 + shift + i * 0.355;
       const y = shelfY - 0.07 * Math.sin((i * Math.PI) / 2);
       points.push([x, y, -0.62]);
       if (i % 2 === 0) fairyBulb(x, y, -0.6);
@@ -230,6 +236,7 @@ export function addDeskLighting({
     hemisphere.intensity = lerp(hemisphere.intensity, ROOM_LIGHT.hemisphere[level], step);
     key.intensity = lerp(key.intensity, ROOM_LIGHT.key[level], step);
     fill.intensity = lerp(fill.intensity, ROOM_LIGHT.fill[level], step);
+    sideWall.emissiveIntensity = lerp(sideWall.emissiveIntensity, ROOM_LIGHT.sideWall[level], step);
     scene.environmentIntensity = lerp(
       scene.environmentIntensity,
       ROOM_LIGHT.environment[level],

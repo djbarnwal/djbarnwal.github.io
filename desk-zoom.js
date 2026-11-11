@@ -24,6 +24,7 @@ export function createDeskZoom({
   camera,
   controls,
   home,
+  fitOrbitTarget,
   focus,
   sites,
   reducedMotion,
@@ -141,7 +142,9 @@ export function createDeskZoom({
       place ??= nearestPlace();
       controls.target.lerp(place.center, (next - current) / (limit - current));
     }
-    camera.position.copy(controls.target).add(offset.setLength(controls.maxDistance / next));
+    const radius = controls.maxDistance / next;
+    fitOrbitTarget(controls.target, radius);
+    camera.position.copy(controls.target).add(offset.setLength(radius));
     camera.updateMatrixWorld(true);
     if (next >= limit) fallIn(place.object);
   }

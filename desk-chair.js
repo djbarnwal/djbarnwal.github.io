@@ -1,3 +1,5 @@
+import { DESKTOP, ROOM } from './desk-layout.js';
+
 // A softly rounded black office chair, pulled slightly to the side, and the rug under the desk.
 export function addDeskChair({
   THREE,
@@ -10,7 +12,7 @@ export function addDeskChair({
   curve,
   group,
 }) {
-  const chair = group(3.02, 0, 2.45);
+  const chair = group(ROOM.right - 0.8, 0, 2.45);
   chair.name = 'black-office-chair';
   chair.rotation.y = -0.24;
 
@@ -82,11 +84,13 @@ export function addDeskChair({
   // The rug runs from just behind the desk to the chair's front edge, and no further.
   const rugBack = -0.7;
   const rugFront = new THREE.Box3().setFromObject(chair).max.z;
+  const rugLeft = DESKTOP.left - 0.2;
+  const rugRight = ROOM.right - 0.09;
   const rug = box(
-    6.9,
+    rugRight - rugLeft,
     0.05,
     rugFront - rugBack,
-    0.75,
+    (rugRight + rugLeft) / 2,
     -0.025,
     (rugFront + rugBack) / 2,
     surfaces.rug,

@@ -1,3 +1,5 @@
+import { UPPER_SHELF_SHIFT } from './desk-layout.js';
+
 // Framed prints: a Jamshedpur map on the shelving, a Triund photo on the lower wall
 // shelf, and The Dark Knight Rises and Interstellar posters on the top one. A click on
 // any of them zooms the camera in (see desk-focus.js). Returns the placeholder photo
@@ -127,7 +129,7 @@ export function addDeskWallFrames({
   // A movie poster on the top wall shelf. Zoomed in, it fills the screen, centred on
   // `focusPoint` (see `zoomable`).
   function moviePoster({ name, caption, x, width, url, detail, focusPoint }) {
-    const poster = printFrame(x, 4.67, -0.98, width, 0.94, url, {
+    const poster = printFrame(x + UPPER_SHELF_SHIFT, 4.67, -0.98, width, 0.94, url, {
       blank: '#0b0806',
       tint: '#d9d3ca',
     });

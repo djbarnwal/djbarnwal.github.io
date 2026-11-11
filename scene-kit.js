@@ -29,11 +29,16 @@ export function createSceneKit({ scene, renderer, discoveries }) {
   const materials = {};
   for (const [name, color] of Object.entries(PALETTE)) materials[name] = mat(color);
   const surfaces = surfaceMaterials(anisotropy);
+  const sideWall = surfaces.wallpaper.clone();
+  // The side walls use the same beige texture for both paint and bounced light.
+  sideWall.emissiveMap = sideWall.map;
+  sideWall.emissive.set('#ffffff');
   Object.assign(materials, {
     wood: surfaces.wood,
     woodLight: surfaces.wood,
     metal: surfaces.metal,
-    wall: surfaces.plaster,
+    wall: surfaces.wallpaper,
+    sideWall,
     floor: surfaces.floor,
   });
   for (const name of ['leaf', 'leaf2', 'leaf3']) {

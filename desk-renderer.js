@@ -20,7 +20,7 @@ const BLOOM = { strength: 0.62, radius: 0.55, threshold: 0.86 };
 // things blur away from the focused object; maxBlur caps the blur in screen units.
 const DEPTH_OF_FIELD = { aperture: 0.0016, maxBlur: 0.015 };
 
-const BACKGROUND = '#675f56';
+const BACKGROUND = '#243849';
 
 export function createDeskRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({

@@ -1,3 +1,5 @@
+import { PEGBOARD_Z, ROOM } from './desk-layout.js';
+
 // Visible size of the photograph inside each Polaroid frame.
 const PRINT_WIDTH = 0.273;
 const PRINT_HEIGHT = 0.281;
@@ -19,14 +21,14 @@ const CLIP = { width: 0.064, height: 0.21, grip: 0.04 };
 // top edge (negative is left) to keep it off the subject.
 const POLAROIDS = [
   {
-    x: 3.32,
+    x: -0.44,
     tilt: -0.07,
     photo: 'assets/polaroid-1.jpg',
     caption: 'Manhattan at dusk from the Empire State Building, New York, 2019',
     handwriting: 'New York, 2019',
   },
   {
-    x: 3.76,
+    x: 0,
     tilt: 0.04,
     clipOffset: -0.065,
     photo: 'assets/polaroid-2.jpg',
@@ -34,7 +36,7 @@ const POLAROIDS = [
     handwriting: 'Paris, 2018',
   },
   {
-    x: 4.2,
+    x: 0.44,
     tilt: -0.045,
     photo: 'assets/polaroid-3.jpg',
     caption: 'The Dhauladhar range at sunset from Triund, 2025',
@@ -85,8 +87,26 @@ export function addDeskPegboard({
     );
   }
 
-  const pegboard = group();
-  pegboard.name = 'pegboard-keepsakes';
+  const pegboard = group(ROOM.right, 3.18, PEGBOARD_Z);
+  pegboard.name = 'side-wall-pegboard';
+  pegboard.rotation.y = -Math.PI / 2;
+  box(1.38, 1.52, 0.08, 0, 0, 0.05, mat('#e0dbcc'), pegboard, 0.035);
+
+  const columns = 14;
+  const rows = 15;
+  const holes = new THREE.InstancedMesh(
+    new THREE.CircleGeometry(0.018, 6),
+    mat('#939c8a'),
+    columns * rows,
+  );
+  const transform = new THREE.Matrix4();
+  for (let row = 0; row < rows; row++) {
+    for (let column = 0; column < columns; column++) {
+      transform.makeTranslation((column - 6.5) * 0.09, (row - 7) * 0.091, 0.096);
+      holes.setMatrixAt(row * columns + column, transform);
+    }
+  }
+  pegboard.add(holes);
 
   // A slab with fully rounded ends and softened edges, centred on its own depth.
   function stadium(width, height, thickness) {
@@ -128,7 +148,7 @@ export function addDeskPegboard({
 
   // The Polaroids and their clips share one group, so a click on any of them zooms
   // in on all three.
-  const photos = group(3.76, 3.22, -1.205, pegboard);
+  const photos = group(0, 0.34, 0.115, pegboard);
   photos.name = 'pegboard-photos';
   photos.userData.caption =
     'Photos on the pegboard: ' + POLAROIDS.map(({ caption }) => caption).join(', ');
@@ -144,15 +164,14 @@ export function addDeskPegboard({
     verticalCrop = 0.5,
     handwriting,
   }) {
-    const left = x - photos.position.x;
     // The clip sits on the tilted Polaroid's top edge, `clipOffset` from its middle.
     clip(
-      left - Math.sin(tilt) * (POLAROID_HEIGHT / 2) + Math.cos(tilt) * clipOffset,
+      x - Math.sin(tilt) * (POLAROID_HEIGHT / 2) + Math.cos(tilt) * clipOffset,
       POLAROID_HEIGHT / 2 - CLIP.grip + CLIP.height / 2 + Math.sin(tilt) * clipOffset,
       photos,
     );
 
-    const print = group(left, 0, 0, photos);
+    const print = group(x, 0, 0, photos);
     print.rotation.z = tilt;
     box(
       POLAROID_WIDTH,
@@ -207,10 +226,10 @@ export function addDeskPegboard({
   }
 
   // Scissors: two handle loops, two blades, and a pivot screw.
-  const scissors = group(3.39, 2.83, -1.055, pegboard);
+  const scissors = group(-0.37, -0.05, 0.265, pegboard);
   scissors.name = 'pegboard-scissors';
   scissors.rotation.z = -0.1;
-  hook(3.32, 2.9, -1.17, pegboard);
+  hook(-0.44, 0.02, 0.15, pegboard);
   ring(0.055, 0.017, -0.07, 0, 0, charcoal, scissors, 1, 1.26);
   ring(0.055, 0.017, 0.07, 0, 0, charcoal, scissors, 1, 1.26);
   curve(
@@ -277,9 +296,9 @@ export function addDeskPegboard({
 
   // A key ring with a leather fob and three keys (one brass) that swing when clicked.
   function addKeychain() {
-    const keychain = group(4.02, 2.81, -1.065, pegboard);
+    const keychain = group(0.26, -0.07, 0.255, pegboard);
     keychain.name = 'pegboard-keychain';
-    hook(4.02, 2.91, -1.17, pegboard);
+    hook(0.26, 0.03, 0.15, pegboard);
     ring(0.073, 0.009, 0, 0, 0, steel, keychain);
     const leather = mat('#8e593b', { roughness: 0.83 });
     box(0.102, 0.19, 0.022, 0.1, -0.13, 0.014, leather, keychain, 0.018);
